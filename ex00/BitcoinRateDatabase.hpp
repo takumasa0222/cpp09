@@ -1,9 +1,14 @@
 #ifndef BITCOINRATEDATABASE
 #define BITCOINRATEDATABASE
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <cstdlib>
+#include <cerrno>
+#include <climits>
+#include <limits>
 #include <map>
 #include <string>
-#include <fstream>
-#include <istream>
 
 class BitcoinRateDatabase {
 public: 
@@ -15,6 +20,10 @@ public:
     void bulkLoadRawData(std::ifstream& rawData);
 private:
     std::map<std::string, double> _db;
+    static bool isLeapYear(int year);
+    static bool isValidDate(const std::string& date);
+    static bool splitLine(const std::string& line, char delimiter, std::string& left, std::string& right);
+    static bool parseExchangeRate(const std::string& text, double& exchangeRate);
 };
 
-#endif BITCOINRATEDATABASE
+#endif 

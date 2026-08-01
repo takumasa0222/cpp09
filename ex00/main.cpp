@@ -15,7 +15,7 @@ void runProgram(int argc, char** argv)
     if (!rawDb)
         throw std::logic_error("Error: Invalid db file");
     BitcoinRateDatabase bit_db;
-    bit_db.bulkUpsertRawData(rawDb);
+    bit_db.bulkLoadRawData(rawDb);
     BitcoinExchange exchanger;
     exchanger.exchange(in ,bit_db);
 }
