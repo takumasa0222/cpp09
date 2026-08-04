@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: tamatsuu <tamatsuu@student.42.fr>          +#+  +:+       +#+         #
+#    By: tamatsuu <tamatsuu@student.42tokyo.jp>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/08/01 18:05:35 by tamatsuu          #+#    #+#              #
-#    Updated: 2026/08/01 18:07:39 by tamatsuu         ###   ########.fr        #
+#    Updated: 2026/08/05 06:39:55 by tamatsuu         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,9 @@ CC = c++
 INCLUDES = -I ./
 CFLAGS = -Wall -Wextra -Werror -std=c++98
 SRCS    =   main.cpp \
-			BitcoinExchange.cpp
+			BitcoinExchange.cpp \
+			BitcoinRateDatabase.cpp \
+			Utility.cpp
 OBJS    = $(SRCS:.cpp=.o)
 LIBDIR  = 
 LIBS    = 

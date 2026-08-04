@@ -1,5 +1,5 @@
 #include "BitcoinRateDatabase.hpp"
-#include "StringUtility.hpp"
+#include "Utility.hpp"
 
 BitcoinRateDatabase::BitcoinRateDatabase(){};
 
@@ -25,28 +25,12 @@ std::map<std::string, double> BitcoinRateDatabase::getDb() const
 void BitcoinRateDatabase::bulkLoadRawData(std::ifstream& rawData)
 {
     std::string line;
-    bool isHeaderCheck = false;
-    while (std::getline(rawData,line))
-    {
-        if (line.empty()) 
-            continue;
-        if (!isHeaderCheck){
-            isHeaderCheck = true;
-            std::string headerLine = StringUtility::trimSpace(line);
-            if (headerLine == "date,exchange_rate")
-                continue;
-        }
-    }
-}
-void BitcoinRateDatabase::bulkLoadRawData(std::ifstream& rawData)
-{
-    std::string line;
     bool isFirstNonEmptyLine = true;
     unsigned int lineNumber = 0;
     while (std::getline(rawData, line))
     {
         ++lineNumber;
-        line = StringUtility::trimSpace(line);
+        line = Utility::trimSpace(line);
         if (line.empty())
             continue;
         if (isFirstNonEmptyLine)
@@ -59,12 +43,12 @@ void BitcoinRateDatabase::bulkLoadRawData(std::ifstream& rawData)
         std::string date;
         std::string rateText;
         double exchangeRate;
-        if (!splitLine(line, ',', date, rateText))
+        if (!Utility::splitLine(line, ',', date, rateText))
         {
             std::cerr << "Error: invalid database format at line " << lineNumber << " => " << line << std::endl;
             continue;
         }
-        if (!isValidDate(date))
+        if (!Utility::isValidDate(date))
         {
             std::cerr << "Error: invalid date at line " << lineNumber << " => " << date << std::endl;
             continue;
@@ -84,57 +68,6 @@ void BitcoinRateDatabase::bulkLoadRawData(std::ifstream& rawData)
     }
 }
 
-bool BitcoinRateDatabase::isLeapYear(int year)
-{
-    if (year % 400 == 0)
-        return true;
-    if (year % 100 == 0)
-        return false;
-    return year % 4 == 0;
-}
-
-bool BitcoinRateDatabase::isValidDate(const std::string& date)
-{
-    if (date.length() != 10)
-        return false;
-    if (date[4] != '-' || date[7] != '-')
-        return false;
-    for (std::size_t i = 0; i < date.length(); ++i)
-    {
-        if (i == 4 || i == 7)
-            continue;
-        if (date[i] < '0' || date[i] > '9')
-            return false;
-    }
-    int year = std::atoi(date.substr(0, 4).c_str());
-    int month = std::atoi(date.substr(5, 2).c_str());
-    int day = std::atoi(date.substr(8, 2).c_str());
-    if (year < 1)
-        return false;
-    if (month < 1 || month > 12)
-        return false;
-    int daysInMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31,30, 31, 30, 31};
-    if (isLeapYear(year))
-        daysInMonth[1] = 29;
-    if (day < 1 || day > daysInMonth[month - 1])
-        return false;
-    return true;
-}
-
-bool BitcoinRateDatabase::splitLine(const std::string& line, char delimiter, std::string& left, std::string& right)
-{
-    std::size_t delimiterPosition = line.find(delimiter);
-    if (delimiterPosition == std::string::npos)
-        return false;
-    if (line.find(delimiter, delimiterPosition + 1) != std::string::npos)
-        return false;
-    left = StringUtility::trimSpace(line.substr(0, delimiterPosition));
-    right = StringUtility::trimSpace(line.substr(delimiterPosition + 1));
-    if (left.empty() || right.empty())
-        return false;
-    return true;
-}
-
 bool BitcoinRateDatabase::parseExchangeRate(const std::string& text, double& exchangeRate)
 {
     errno = 0;
@@ -152,5 +85,35 @@ bool BitcoinRateDatabase::parseExchangeRate(const std::string& text, double& exc
         return false;
     if (exchangeRate < 0.0)
         return false;
+    return true;
+}
+
+bool BitcoinRateDatabase::getExchangeRate(const std::string date, double &exchangeRate) const
+{
+    if (_db.empty())
+        return false;
+    std::map<std::string, double>::const_iterator it;
+    it = _db.lower_bound(date);
+
+    if (it != _db.end() && it->first == date)
+    {
+        exchangeRate = it->second;
+        return true;
+    }
+
+    /*
+     * begin() の位置だった場合、
+     * 指定日より前のデータが存在しない。
+     */
+    if (it == _db.begin())
+        return false;
+
+    /*
+     * 指定日より大きい日付を指しているため、
+     * 一つ前の要素に戻る。
+     */
+    --it;
+
+    exchangeRate = it->second;
     return true;
 }
