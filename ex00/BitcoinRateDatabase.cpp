@@ -100,18 +100,8 @@ bool BitcoinRateDatabase::getExchangeRate(const std::string date, double &exchan
         exchangeRate = it->second;
         return true;
     }
-
-    /*
-     * begin() の位置だった場合、
-     * 指定日より前のデータが存在しない。
-     */
     if (it == _db.begin())
         return false;
-
-    /*
-     * 指定日より大きい日付を指しているため、
-     * 一つ前の要素に戻る。
-     */
     --it;
 
     exchangeRate = it->second;
