@@ -13,7 +13,7 @@ BitcoinRateDatabase& BitcoinRateDatabase::operator=(const BitcoinRateDatabase& s
 {
     if (this == &source)
         return *this;
-    this->_db == source.getDb();
+    this->_db = source.getDb();
     return *this;
 }
 
